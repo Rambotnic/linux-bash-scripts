@@ -1,0 +1,8 @@
+alias ff="fastfetch"
+alias cdq="zoxide query -l -s | more"
+alias cls="clear; fastfetch"
+alias ls="ls --color"
+alias lsa="ls --color -a"
+alias showip="hostname -I"
+alias resetMetaKey="kwriteconfig5 --file ~/.config/kwinrc --group ModifierOnlyShortcuts --key Meta 'org.kde.plasmashell>"
+alias nvdrv="modinfo -F version nvidia 2>/dev/null"

@@ -1,0 +1,2 @@
+export PATH="$PATH:$HOME/.local/bin:/usr/bin/zoxide:$HOME/node_modules/.bin:/opt/nvim-linux-x86_64/bin"
+export SUDO_EDITOR=/opt/nvim-linux-x86_64/bin/nvim
