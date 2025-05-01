@@ -19,9 +19,6 @@ These are equivalent to Windows' shortcuts. `Meta` in this case would be the Win
 	* Launch: `Meta + B`
 * **KRunner**
 	* Shortcut: `Meta + R`
-* **Flameshot**
-	* Open launcher: `Print`
-	* Take screenshot: `Meta + Shift + S`
 * **System Monitor**
 	* Shortcut: `Ctrl + Shift + Esc`
 * **System Settings**
