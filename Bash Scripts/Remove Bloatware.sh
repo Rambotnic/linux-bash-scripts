@@ -50,6 +50,7 @@ main() {
 	echo -e "===============================${CLR_DEFAULT}"
 	sleep 2
 	sudo dnf autoremove -y
+    sudo dnf clean all
 
 	echo -e "${CLR_GREEN}\nALL DONE! :)\n${CLR_DEFAULT}"
 
