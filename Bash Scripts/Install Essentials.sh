@@ -15,17 +15,16 @@ installPkgs() {
 
 	# Essential packages
 	packages=(
-		# plasma-workspace-x11
 		git
 		zsh
 		fzf
 		fastfetch
 		htop
 		qdirstat
+        bleachbit
 		qalculate-qt
 		vlc
 		libavcodec-freeworld
-		flameshot
 		gimp
 		audacity
 		easytag
