@@ -34,6 +34,7 @@ installPkgs() {
 		goverlay
 		discord
 		steam
+		virt-manager
 	)
 
 	for pkg in "${packages[@]}"; do
@@ -160,6 +161,9 @@ setup() {
 	declare username=$(whoami)
 	declare zshDir=$(which zsh)
 	sudo sed -i -e "s|root:/bin/bash|root:$zshDir|g" -e "s|$username:/bin/bash|$username:$zshDir|g" /etc/passwd
+
+	# Enable the virtualization daemon
+	sudo systemctl enable --now libvirtd
 }
 
 displayInstallMessage() {
