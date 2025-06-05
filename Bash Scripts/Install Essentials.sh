@@ -162,8 +162,9 @@ setup() {
 	declare zshDir=$(which zsh)
 	sudo sed -i -e "s|root:/bin/bash|root:$zshDir|g" -e "s|$username:/bin/bash|$username:$zshDir|g" /etc/passwd
 
-	# Enable the virtualization daemon
+	# Enable the virtualization daemon and add user to libvirt group
 	sudo systemctl enable --now libvirtd
+	sudo usermod -a -G libvirt $USER
 }
 
 displayInstallMessage() {
