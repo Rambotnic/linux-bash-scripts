@@ -27,7 +27,7 @@ installPkgs() {
         zsh
         fzf
         fastfetch
-        htop
+        btop
         qdirstat
         bleachbit
         qalculate-qt
