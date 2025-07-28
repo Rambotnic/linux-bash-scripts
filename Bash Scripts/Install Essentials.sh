@@ -47,9 +47,7 @@ installPkgs() {
     )
 
     for pkg in "${packages[@]}"; do
-        declare isPkgNotInstalled=$(rpm -q $pkg 2>/dev/null | grep -c "is not installed")
-
-        if [ $isPkgNotInstalled = 1 ]; then
+        if ! rpm -q $pkg &>/dev/null; then
             displayInstallMessage $pkg
             sudo dnf install $pkg -y
             sleep 1
@@ -146,7 +144,7 @@ setupCopr() {
 setupRepositories() {
     # Enable Copr repos
     setupCopr
-     
+    
     # Replace Fedora's flatpak repo with Flathub's
     flatpak remote-delete fedora && flatpak remote-delete fedora-testing
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
