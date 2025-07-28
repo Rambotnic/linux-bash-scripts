@@ -181,7 +181,9 @@ echo -e "\033]2;Install Essentials\007"
 echo -e "This file will install essential packages on your computer and you will be prompted for your superuser password in order to do so."
 echo -e "NOTE: Please make sure to run this file AFTER 'Remove Bloatware.sh'\n\n"
 while true; do
-    read -p "Do you wish to continue? [y/n]: " yn
+    read -p "Do you wish to continue? [y/N]: " yn
+    yn=${yn:-n}
+
     case $yn in
         [Nn]* ) exit;;
         [Yy]* ) installPkgs;;
