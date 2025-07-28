@@ -10,7 +10,6 @@ Don't just trust any random script you find on this site. If you intend to use t
 * Remove Bloatware.sh
 * Install Essentials.sh
 * [Vencord Installer.sh](https://github.com/Vendicated/Vencord)
-* [scrcpy.sh](https://github.com/Genymobile/scrcpy)
 
 **HOW TO USE:** Open the scripts folder in the terminal and type `sudo chmod a+x ./*`, then run file you want.
 
