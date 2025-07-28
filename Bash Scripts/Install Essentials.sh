@@ -133,7 +133,20 @@ curlDownloads() {
     fi
 }
 
+setupCopr() {
+    local repos=(
+        "zeno/scrcpy"
+    )
+
+    for repo in "${repos[@]}"; do
+        sudo dnf copr enable -y "$repo"
+    done
+}
+
 setupRepositories() {
+    # Enable Copr repos
+    setupCopr
+     
     # Replace Fedora's flatpak repo with Flathub's
     flatpak remote-delete fedora && flatpak remote-delete fedora-testing
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
