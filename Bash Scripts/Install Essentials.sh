@@ -6,6 +6,14 @@ declare CLR_YELLOW="\033[1;33m"
 declare CLR_CYAN="\033[1;36m"
 declare CLR_GREEN="\033[1;32m"
 
+displayInstallMessage() {
+    echo -e "${CLR_YELLOW}"
+    echo -e "\n=================================="
+    echo -e " Installing $1 "
+    echo -e "=================================="
+    echo -e "${CLR_DEFAULT}"
+}
+
 installPkgs() {
     # Update existing packages first
     sudo dnf upgrade -y
@@ -165,14 +173,6 @@ setup() {
     # Enable the virtualization daemon and add user to libvirt group
     sudo systemctl enable --now libvirtd
     sudo usermod -a -G libvirt $USER
-}
-
-displayInstallMessage() {
-    echo -e "${CLR_YELLOW}"
-    echo -e "\n=================================="
-    echo -e " Installing $1 "
-    echo -e "=================================="
-    echo -e "${CLR_DEFAULT}"
 }
 
 # Entry point
