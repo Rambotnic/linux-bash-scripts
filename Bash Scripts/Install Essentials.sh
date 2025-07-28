@@ -44,6 +44,7 @@ installPkgs() {
         steam
         virt-manager
         kolourpaint
+        scrcpy
     )
 
     for pkg in "${packages[@]}"; do
