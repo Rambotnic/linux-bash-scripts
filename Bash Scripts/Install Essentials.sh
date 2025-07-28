@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Text colors
-declare CLR_DEFAULT="\033[1;0m"
-declare CLR_YELLOW="\033[1;33m"
-declare CLR_CYAN="\033[1;36m"
-declare CLR_GREEN="\033[1;32m"
+CLR_DEFAULT="\033[1;0m"
+CLR_YELLOW="\033[1;33m"
+CLR_CYAN="\033[1;36m"
+CLR_GREEN="\033[1;32m"
 
 displayInstallMessage() {
     echo -e "${CLR_YELLOW}"
@@ -77,7 +77,7 @@ installGraphicsDrivers() {
     displayInstallMessage "graphics drivers"
     sleep 1
 
-    gpuInfo=$(lspci | grep -i vga)
+    local gpuInfo=$(lspci | grep -i vga)
 
     if [[ $gpuInfo == *"NVIDIA Corporation"* ]]; then
         #====================================
@@ -87,7 +87,7 @@ installGraphicsDrivers() {
         sudo dnf install akmod-nvidia -y
 
         while true; do
-            driver_version=$(modinfo -F version nvidia 2>/dev/null)
+            local driver_version=$(modinfo -F version nvidia 2>/dev/null)
 
             if [[ -n "$driver_version" ]]; then
                 echo -e "${CLR_GREEN}NVIDIA driver installed.${CLR_DEFAULT}"
@@ -144,7 +144,7 @@ setupCopr() {
 setupRepositories() {
     # Enable Copr repos
     setupCopr
-    
+
     # Replace Fedora's flatpak repo with Flathub's
     flatpak remote-delete fedora && flatpak remote-delete fedora-testing
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -178,8 +178,8 @@ setup() {
     mv ../Shell\ Configs/.zsh* ~/
 
     # Set zsh to be the default shell
-    declare username=$(whoami)
-    declare zshDir=$(which zsh)
+    local username=$(whoami)
+    local zshDir=$(which zsh)
     sudo sed -i -e "s|root:/bin/bash|root:$zshDir|g" -e "s|$username:/bin/bash|$username:$zshDir|g" /etc/passwd
 
     # Enable the virtualization daemon and add user to libvirt group
