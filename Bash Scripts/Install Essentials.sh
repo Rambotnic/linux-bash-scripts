@@ -43,6 +43,7 @@ installPkgs() {
         discord
         steam
         virt-manager
+        kolourpaint
     )
 
     for pkg in "${packages[@]}"; do
