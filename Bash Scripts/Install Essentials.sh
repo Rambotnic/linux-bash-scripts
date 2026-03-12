@@ -1,205 +1,238 @@
 #!/bin/bash
 
 # Text colors
-CLR_DEFAULT="\033[1;0m"
-CLR_YELLOW="\033[1;33m"
-CLR_CYAN="\033[1;36m"
-CLR_GREEN="\033[1;32m"
+readonly CLR_DEFAULT="\033[1;0m"
+readonly CLR_RED="\033[1;31m"
+readonly CLR_YELLOW="\033[1;33m"
+readonly CLR_GREEN="\033[1;32m"
+readonly CLR_CYAN="\033[1;36m"
 
-displayInstallMessage() {
-    echo -e "${CLR_YELLOW}"
-    echo -e "\n=================================="
-    echo -e " Installing $1 "
-    echo -e "=================================="
-    echo -e "${CLR_DEFAULT}"
+readonly DNF_PACKAGES=(
+    git
+    zsh
+    fzf
+    curl
+    fastfetch
+    btop
+    qdirstat
+    bleachbit
+    qalculate-qt
+    vlc
+    libavcodec-freeworld
+    gimp
+    audacity
+    easytag
+    openrgb
+    mangohud
+    goverlay
+    discord
+    steam
+    virt-manager
+    kolourpaint
+    scrcpy
+)
+
+readonly COPR_REPOS=(
+    "zeno/scrcpy"
+)
+
+declare -A FLATPAKS=(
+    ["io.github.kolunmi.Bazaar"]="Bazaar"
+    ["it.mijorus.gearlever"]="Gear Lever"
+    ["io.github.seadve.Mousai"]="Mousai"
+    ["org.nickvision.tubeconverter"]="Parabolic"
+)
+
+readonly FLATPAKS
+
+# Utility functions
+logHeader() {
+    echo -e "\n${CLR_YELLOW} > $1 "
+    echo -e "-----------------------------------${CLR_DEFAULT}"
 }
 
-installPkgs() {
-    # Update existing packages first
-    sudo dnf upgrade -y
+logSuccess() {
+    echo -e "${CLR_GREEN}$1${CLR_DEFAULT}"
+}
 
-    curlDownloads
+logInfo() {
+    echo -e "\n${CLR_CYAN}$1${CLR_DEFAULT}"
+}
+
+logError() {
+    echo -e "${CLR_RED}$1${CLR_DEFAULT}"
+}
+
+beginInstallation() {
     setupRepositories
+    installSystemPackages
+    installCurlPackages
+    installFlatpaks
+    installGraphicsDrivers
+    configureSystem
+    restartSession
+}
 
-    # Essential packages
-    packages=(
-        git
-        zsh
-        fzf
-        fastfetch
-        btop
-        qdirstat
-        bleachbit
-        qalculate-qt
-        vlc
-        libavcodec-freeworld
-        gimp
-        audacity
-        easytag
-        autokey-qt
-        openrgb
-        mangohud
-        goverlay
-        discord
-        steam
-        virt-manager
-        kolourpaint
-        scrcpy
-    )
+setupRepositories() {
+    logHeader "Configuring repositories"
 
-    for pkg in "${packages[@]}"; do
-        if ! rpm -q $pkg &>/dev/null; then
-            displayInstallMessage $pkg
-            sudo dnf install $pkg -y
-            sleep 1
-        fi
+    for repo in "${COPR_REPOS[@]}"; do
+        logInfo ">>> Enabling COPR: $repo"
+        sudo dnf copr enable -y "$repo"
     done
 
-    sleep 1
+    logInfo ">>> Enabling Flathub"
+    flatpak remote-delete fedora && flatpak remote-delete fedora-testing
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    installGraphicsDrivers
-    removeDependencies
-    setup
+    logInfo ">>> Enabling RPM Fusion"
+    sudo dnf install -y \
+        https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+}
 
-    echo -e "${CLR_GREEN}\nALL DONE! :)\n${CLR_DEFAULT}"
-    echo "Some settings require a session restart to take effect."
-    
-    while true; do
-        read -p "Would you like to restart your session now? (You can do this later if you want) [y/n]: " yn
-        case $yn in
-            [Nn]* ) exit;;
-            [Yy]* ) sudo pkill -KILL -u $(whoami);;
-            * ) echo -e "\nPlease select yes (Y) or no (N). ";;
-        esac
+installSystemPackages() {
+    logHeader "Running system upgrade"
+    sudo dnf upgrade -y
+
+    logHeader "Installing system packages"
+
+    for pkg in "${DNF_PACKAGES[@]}"; do
+        if rpm -q $pkg &>/dev/null; then
+            logSuccess "> $pkg already installed"
+        else
+            logInfo ">>> Installing $pkg"
+            sudo dnf install $pkg -y
+        fi
+    done
+}
+
+installCurlPackages() {
+    logHeader "Installing external packages (curl)"
+
+    logInfo ">>> Installing Brave Browser"
+    curl -fsS https://dl.brave.com/install.sh | sh
+
+    logInfo ">>> Installing Zoxide"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+    logInfo ">>> Installing Zed"
+    curl -f https://zed.dev/install.sh | sh
+}
+
+installFlatpaks() {
+    logHeader "Installing Flatpaks"
+
+    for pkg in "${!FLATPAKS[@]}"; do
+        logInfo ">>> Installing ${FLATPAKS[$pkg]}"
+        flatpak install flathub "$pkg" -y
     done
 }
 
 installGraphicsDrivers() {
-    displayInstallMessage "graphics drivers"
-    sleep 1
+    logHeader "Checking graphics drivers"
 
     local gpuInfo=$(lspci | grep -i vga)
+    local nvidiaDrivers=akmod-nvidia
+    local amdDrivers=mesa-vulkan-drivers
 
     if [[ $gpuInfo == *"NVIDIA Corporation"* ]]; then
-        #====================================
-        # https://rpmfusion.org/Howto/NVIDIA
-        #====================================
-        echo -e "${CLR_CYAN}NVIDIA GPU detected. Installing NVIDIA drivers...${CLR_DEFAULT}"
-        sudo dnf install akmod-nvidia -y
+        # For reference: https://rpmfusion.org/Howto/NVIDIA
+        logInfo "NVIDIA GPU detected.\n"
 
-        while true; do
-            local driver_version=$(modinfo -F version nvidia 2>/dev/null)
+        if rpm -q $nvidiaDrivers &>/dev/null; then
+            logSuccess "> NVIDIA drivers already installed"
+        else
+            logInfo ">>> Installing NVIDIA drivers..."
+            sudo dnf install $nvidiaDrivers -y
 
-            if [[ -n "$driver_version" ]]; then
-                echo -e "${CLR_GREEN}NVIDIA driver installed.${CLR_DEFAULT}"
-                break
-            else
-                echo -e "${CLR_YELLOW}kmod is being built. DO NOT CLOSE THIS WINDOW!.${CLR_DEFAULT}"
-                echo "Checking again in 10 seconds..."
+            logInfo "Waiting for kernel module build (do not close)..."
+
+            while ! modinfo -F version nvidia &>/dev/null; do
                 sleep 10
-            fi
-        done
+                echo -n "."
+            done
+
+            logSuccess "NVIDIA drivers ready"
+        fi
     elif [[ $gpu_info == *"Advanced Micro Devices"* ]]; then
-        echo -e "${CLR_CYAN}AMD GPU detected. Installing AMD drivers...${CLR_DEFAULT}"
+        # AMD drivers are included in Fedora by default, but might as well double check
+        logInfo "AMD GPU detected."
 
-        # They are included in Fedora by default, but might as well double check
-        sudo dnf install mesa-vulkan-drivers
+        if rpm -q $amdDrivers &>/dev/null; then
+            logSuccess "> AMD Vulkan drivers already installed"
+        else
+            logInfo ">>> Installing AMD Vulkan drivers..."
+            sudo dnf install $amdDrivers -y
+        fi
     else
-        echo "No NVIDIA or AMD GPU detected."
+        logError "No NVIDIA or AMD GPU detected."
     fi
 }
 
-curlDownloads() {
-    sudo dnf install curl -y
+configureSystem() {
+    logHeader "Applying system configurations"
 
-    # Brave Browser
-    displayInstallMessage "brave-browser"
-    curl -fsS https://dl.brave.com/install.sh | sh
+    logInfo ">>> Setting date & time locale to British English"
+    sudo localectl set-locale LC_TIME=en_GB.UTF8
 
-    # Zoxide (smarter `cd` command)
-    displayInstallMessage "zoxide"
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    logInfo ">>> Setting numeric and monetary locales to Brazilian Portuguese"
+    sudo localectl set-locale LC_NUMERIC=pt_BR.UTF8 LC_MONETARY=pt_BR.UTF8
 
-    # Neovim
-    displayInstallMessage "neovim"
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-    sudo rm -rf /opt/nvim
-    sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-    rm nvim-linux-x86_64.tar.gz
+    # # Move custom zsh files to the correct directory
+    # mv ../Shell\ Configs/.zsh* ~/
 
-    if [ ! -d ~/.config/nvim/ ]; then
-        mkdir ~/.config/nvim/
-    fi
-}
-
-setupCopr() {
-    local repos=(
-        "zeno/scrcpy"
-    )
-
-    for repo in "${repos[@]}"; do
-        sudo dnf copr enable -y "$repo"
-    done
-}
-
-setupRepositories() {
-    # Enable Copr repos
-    setupCopr
-
-    # Replace Fedora's flatpak repo with Flathub's
-    flatpak remote-delete fedora && flatpak remote-delete fedora-testing
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
-    # Enable RPM Fusion
-    sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
-    sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
-}
-
-removeDependencies() {
-    echo -e "${CLR_YELLOW}"
-    echo -e "=================================="
-    echo -e " REMOVING UNUSED DEPENDENCIES...  "
-    echo -e "=================================="
-    echo -e "${CLR_DEFAULT}"
-    sleep 1
-    sudo dnf autoremove -y
-    sudo dnf clean all
-}
-
-setup() {
-    echo -e "${CLR_YELLOW}\n=================================="
-    echo -e " Setting up a few things... "
-    echo -e "==================================${CLR_DEFAULT}"
-    sleep 1
-
-    # Change Date & Time locale to British English and Numeric/Monetary locales to Brazilian Portuguese
-    sudo localectl set-locale LC_TIME=en_GB.UTF8 LC_NUMERIC=pt_BR.UTF8 LC_MONETARY=pt_BR.UTF8
-
-    # Move custom zsh files to the correct directory
-    mv ../Shell\ Configs/.zsh* ~/
-
-    # Set zsh to be the default shell
+    logInfo ">>> Setting zsh as default shell"
     local username=$(whoami)
     local zshDir=$(which zsh)
     sudo sed -i -e "s|root:/bin/bash|root:$zshDir|g" -e "s|$username:/bin/bash|$username:$zshDir|g" /etc/passwd
 
-    # Enable the virtualization daemon and add user to libvirt group
+    logInfo ">>> Enabling virtualization"
     sudo systemctl enable --now libvirtd
     sudo usermod -a -G libvirt $USER
+
+    logInfo ">>> Cleaning up dependencies"
+    sudo dnf autoremove -y
+    sudo dnf clean all
 }
 
-# Entry point
-echo -e "\033]2;Install Essentials\007"
+restartSession() {
+    logSuccess "\nFINISHED! :)\n"
+    echo -e "${CLR_YELLOW}NOTE:${CLR_DEFAULT} Some settings require a session restart to take effect."
 
-echo -e "This file will install essential packages on your computer and you will be prompted for your superuser password in order to do so."
-echo -e "NOTE: Please make sure to run this file AFTER 'Remove Bloatware.sh'\n\n"
-while true; do
-    read -p "Do you wish to continue? [y/N]: " yn
-    yn=${yn:-n}
+    while true; do
+        read -p "Would you like to restart your session now? [Y/n]: " yn
+        yn=${yn:-y}
 
-    case $yn in
-        [Nn]* ) exit;;
-        [Yy]* ) installPkgs;;
-        * ) echo -e "\nPlease select yes (Y) or no (N). ";;
-    esac
-done
+        case $yn in
+            [Nn]* ) exit;;
+            [Yy]* ) sudo pkill -KILL -u $(whoami);;
+            * ) logError "\nPlease select YES (Y) or NO (N).";;
+        esac
+    done
+}
+
+setTitle() {
+    echo -e "\033]2;Essential system packages for Fedora\007"
+}
+
+main() {
+    clear
+    setTitle
+
+    echo "This script will install essential packages on your computer and requires administrative (sudo) permissions."
+    echo -e "${CLR_YELLOW}NOTICE:${CLR_DEFAULT} Running scripts from the internet can be dangerous. Please ensure you have audited and trust this script's code before proceeding.\n"
+
+    while true; do
+        read -p "Do you wish to continue? [y/N]: " yn
+        yn=${yn:-n}
+
+        case $yn in
+            [Nn]* ) exit;;
+            [Yy]* ) beginInstallation;;
+            * ) logError "\nPlease select YES (Y) or NO (N).";;
+        esac
+    done
+}
+
+main
