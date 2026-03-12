@@ -175,12 +175,6 @@ installGraphicsDrivers() {
 configureSystem() {
     logHeader "Applying system configurations"
 
-    logInfo ">>> Setting date & time locale to British English"
-    sudo localectl set-locale LC_TIME=en_GB.UTF8
-
-    logInfo ">>> Setting numeric and monetary locales to Brazilian Portuguese"
-    sudo localectl set-locale LC_NUMERIC=pt_BR.UTF8 LC_MONETARY=pt_BR.UTF8
-
     # # Move custom zsh files to the correct directory
     # mv ../Shell\ Configs/.zsh* ~/
 
