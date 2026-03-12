@@ -7,30 +7,32 @@ readonly CLR_YELLOW="\033[1;33m"
 readonly CLR_GREEN="\033[1;32m"
 readonly CLR_CYAN="\033[1;36m"
 
-readonly DNF_PACKAGES=(
-    git
-    zsh
-    fzf
-    curl
-    fastfetch
-    btop
-    qdirstat
-    bleachbit
-    qalculate-qt
-    vlc
-    libavcodec-freeworld
-    gimp
-    audacity
-    easytag
-    openrgb
-    mangohud
-    goverlay
-    discord
-    steam
-    virt-manager
-    kolourpaint
-    scrcpy
+declare -A DNF_PACKAGES=(
+    ["git"]="Git"
+    ["zsh"]="Zsh"
+    ["fzf"]="fzf"
+    ["curl"]="curl"
+    ["fastfetch"]="Fastfetch"
+    ["btop"]="btop++"
+    ["qdirstat"]="QDirStat"
+    ["bleachbit"]="BleachBit"
+    ["qalculate-qt"]="Qalculate! (Qt)"
+    ["vlc"]="VLC media player"
+    ["libavcodec-freeworld"]="Multimedia Codecs"
+    ["gimp"]="GNU Image Manipulation Program (GIMP)"
+    ["audacity"]="Audacity"
+    ["easytag"]="EasyTAG"
+    ["openrgb"]="OpenRGB"
+    ["mangohud"]="MangoHud"
+    ["goverlay"]="Goverlay"
+    ["discord"]="Discord"
+    ["steam"]="Steam"
+    ["virt-manager"]="Virtual Machine Manager"
+    ["kolourpaint"]="KolourPaint"
+    ["scrcpy"]="scrcpy"
 )
+
+readonly DNF_PACKAGES
 
 readonly COPR_REPOS=(
     "zeno/scrcpy"
@@ -97,11 +99,11 @@ installSystemPackages() {
 
     logHeader "Installing system packages"
 
-    for pkg in "${DNF_PACKAGES[@]}"; do
+    for pkg in "${!DNF_PACKAGES[@]}"; do
         if rpm -q $pkg &>/dev/null; then
-            logSuccess "> $pkg already installed"
+            logSuccess "> ${DNF_PACKAGES[$pkg]} already installed"
         else
-            logInfo ">>> Installing $pkg"
+            logInfo ">>> Installing ${DNF_PACKAGES[$pkg]}"
             sudo dnf install $pkg -y
         fi
     done
