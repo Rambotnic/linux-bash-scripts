@@ -1,0 +1,26 @@
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
+
+# Allow CTRL+Left/Right Arrows to move cursor between words
+bindkey "^[[1;5D" backward-word
+bindkey "^[[1;5C" forward-word
+
+# Allow CTRL+Backspace to delete a whole word
+bindkey "^H" backward-kill-word
+
+# Allow Home/End to move cursor to the beginning/end of the line
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+
+# Fix Delete key
+bindkey "^[[3~" delete-char
+
+# Change behavior of CTRL+L to clear terminal and call fastfetch
+clearFF() {
+	clear
+	fastfetch
+	zle reset-prompt
+}
+
+zle -N clearFF
+bindkey "^L" clearFF

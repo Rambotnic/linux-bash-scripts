@@ -2,6 +2,7 @@
 fastfetch
 
 [ -f ~/.zsh_exports ] && source ~/.zsh_exports
+[ -f ~/.zsh_bindkeys ] && source ~/.zsh_bindkeys
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -16,20 +17,6 @@ promptinit
 prompt adam1
 
 setopt histignorealldups sharehistory
-
-# Use emacs keybindings even if our EDITOR is set to vi
-bindkey -e
-
-# Allow CTRL + Left/Right Arrows to move cursor between words
-bindkey "^[[1;5D" backward-word
-bindkey "^[[1;5C" forward-word
-
-# Allow Home/End to move cursor to the beginning/end of the line
-bindkey "^[[H" beginning-of-line
-bindkey "^[[F" end-of-line
-
-# Fix Delete key
-bindkey "^[[3~" delete-char
 
 # Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
 HISTSIZE=1000
