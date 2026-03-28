@@ -43,6 +43,7 @@ declare -A FLATPAKS=(
     ["it.mijorus.gearlever"]="Gear Lever"
     ["io.github.seadve.Mousai"]="Mousai"
     ["org.nickvision.tubeconverter"]="Parabolic"
+    ["com.vysp3r.ProtonPlus"]="ProtonPlus"
 )
 
 readonly FLATPAKS
