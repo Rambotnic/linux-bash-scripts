@@ -1,0 +1,141 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "source": "/usr/share/icons/hicolor/256x256/apps/fedora-logo-icon.png",
+    "width": 32,
+    "padding": {
+      "left": 1,
+      "top": 1
+    }
+  },
+  "display": {
+      "separator": "",
+      "key": {
+          "width": 18
+      }
+  },
+  "modules": [
+    {
+      "type": "custom",
+      "format": "╭───────────────────────── Distro ─────────────────────────╮",
+      "outputColor": "dim_"
+    },
+    {
+      "type": "os",
+      "key": "   OS",
+      "keyColor": "green"
+    },
+    {
+      "type": "kernel",
+      "key": "   Kernel",
+      "keyColor": "green"
+    },
+    {
+      "type": "packages",
+      "key": "   Packages",
+      "keyColor": "green"
+    },
+    {
+      "type": "shell",
+      "key": "   Shell",
+      "keyColor": "green"
+    },
+    {
+      "type": "de",
+      "key": "   DE",
+      "keyColor": "green"
+    },
+    {
+      "type": "wm",
+      "key": "   WM",
+      "keyColor": "green"
+    },
+    {
+      "type": "sound",
+      "key": "   Audio",
+      "keyColor": "green",
+      "format": "{platform-api}"
+    },
+    {
+      "type": "custom",
+      "format": "╰──────────────────────────────────────────────────────────╯",
+      "outputColor": "dim_"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "╭──────────────────────── Hardware ────────────────────────╮",
+      "outputColor": "dim_"
+    },
+    {
+      "type": "display",
+      "key": "   Monitor",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "board",
+      "key": "   Motherboard",
+      "keyColor": "yellow",
+      "format": "{name} ({vendor})"
+    },
+    {
+      "type": "cpu",
+      "key": "   CPU",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "gpu",
+      "key": "   GPU",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "memory",
+      "key": "  🝚 Memory",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "swap",
+      "key": "  🝚 Swap",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "custom",
+      "format": "├───────────────────────── Storage ────────────────────────┤",
+      "outputColor": "dim_"
+    },
+    {
+      "type": "disk",
+      // "key": "   {name} ({mountpoint})",
+      "key": "   {name}",
+      "keyColor": "blue",
+      "format": "{size-used} / {size-total} ({size-percentage})"
+    },
+    {
+      "type": "custom",
+      "format": "╰──────────────────────────────────────────────────────────╯",
+      "outputColor": "dim_"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "╭────────────────────── Uptime / Age ──────────────────────╮",
+      "outputColor": "dim_"
+    },
+    {
+      "type": "command",
+      "key": "   OS Age",
+      "keyColor": "magenta",
+      "text": "birth_install=$(stat -c %W /); current=$(date +%s); echo $(((current - birth_install) / 86400)) days"
+    },
+    {
+      "type": "uptime",
+      "key": "   Uptime",
+      "keyColor": "magenta"
+    },
+    {
+      "type": "custom",
+      "format": "╰──────────────────────────────────────────────────────────╯",
+      "outputColor": "dim_"
+    }
+  ]
+}
